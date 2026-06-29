@@ -1,0 +1,42 @@
+{
+    "name": "skycoder/laravel-securify-audit",
+    "description": "Laravel Security & Audit Scanner by Skycoder",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Al Kazi",
+            "email": "akashcseuu026@gmail.com",
+            "homepage": "https://github.com/skycoder026"
+        }
+    ],
+    "require": {
+        "php": "^7.4|^8.0|^8.1|^8.2|^8.3",
+        "illuminate/support": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+        "illuminate/console": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+        "illuminate/filesystem": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0|^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^4.0|^5.0|^6.0|^7.0|^8.0|^9.0",
+        "phpunit/phpunit": "^8.0|^9.0|^10.0|^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Skycoder\\SecurifyAudit\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Skycoder\\SecurifyAudit\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Skycoder\\SecurifyAudit\\SecurifyAuditServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
