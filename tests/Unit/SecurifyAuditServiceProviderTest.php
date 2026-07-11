@@ -2,17 +2,18 @@
 
 namespace Skycoder\SecurifyAudit\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Test;
 use Skycoder\SecurifyAudit\Tests\TestCase;
 
 class SecurifyAuditServiceProviderTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_registers_the_securify_audit_singleton()
     {
         $this->assertTrue($this->app->has('securify-audit'));
     }
 
-    /** @test */
+    #[Test]
     public function the_singleton_returns_a_securify_audit_instance()
     {
         $instance = $this->app->make('securify-audit');
@@ -23,7 +24,7 @@ class SecurifyAuditServiceProviderTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function it_merges_the_config()
     {
         $config = $this->app['config']->get('securify-audit');
@@ -34,7 +35,7 @@ class SecurifyAuditServiceProviderTest extends TestCase
         $this->assertArrayHasKey('skip', $config);
     }
 
-    /** @test */
+    #[Test]
     public function it_registers_commands_in_console()
     {
         $commands = $this->app->make('config')->get('commands', []);

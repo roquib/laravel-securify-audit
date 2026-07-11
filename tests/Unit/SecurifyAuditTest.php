@@ -2,12 +2,13 @@
 
 namespace Skycoder\SecurifyAudit\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\Test;
 use Skycoder\SecurifyAudit\SecurifyAudit;
 use Skycoder\SecurifyAudit\Tests\TestCase;
 
 class SecurifyAuditTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function it_can_be_instantiated()
     {
         $audit = new SecurifyAudit($this->app);
@@ -15,7 +16,7 @@ class SecurifyAuditTest extends TestCase
         $this->assertInstanceOf(SecurifyAudit::class, $audit);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_an_array_of_results()
     {
         $audit = new SecurifyAudit($this->app);
@@ -25,7 +26,7 @@ class SecurifyAuditTest extends TestCase
         $this->assertNotEmpty($results);
     }
 
-    /** @test */
+    #[Test]
     public function each_result_has_required_keys()
     {
         $audit = new SecurifyAudit($this->app);
@@ -40,7 +41,7 @@ class SecurifyAuditTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_perfect_score_when_all_pass()
     {
         $results = [
@@ -66,7 +67,7 @@ class SecurifyAuditTest extends TestCase
         $this->assertEquals('A+', $audit->getGrade());
     }
 
-    /** @test */
+    #[Test]
     public function it_calculates_score_with_penalties()
     {
         $results = [
@@ -94,7 +95,7 @@ class SecurifyAuditTest extends TestCase
         $this->assertLessThan(100, $score);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_zero_score_when_all_fail()
     {
         $results = [
@@ -120,7 +121,7 @@ class SecurifyAuditTest extends TestCase
         $this->assertEquals('F', $audit->getGrade());
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_correct_grade_for_each_score_range()
     {
         $ranges = [
@@ -148,13 +149,18 @@ class SecurifyAuditTest extends TestCase
             [0, 'F'],
         ];
 
-        $audit = new SecurifyAudit($this->app);
+        $audit = $this->getMockBuilder(SecurifyAudit::class)
+            ->setConstructorArgs([$this->app])
+            ->onlyMethods(['getScore'])
+            ->getMock();
+
+        $currentScore = null;
+        $audit->method('getScore')->willReturnCallback(function () use (&$currentScore) {
+            return $currentScore;
+        });
 
         foreach ($ranges as [$score, $expectedGrade]) {
-            $reflection = new \ReflectionClass($audit);
-            $resultsProperty = $reflection->getProperty('results');
-            $resultsProperty->setAccessible(true);
-            $resultsProperty->setValue($audit, $this->buildResultsForScore($score));
+            $currentScore = $score;
 
             $this->assertEquals(
                 $expectedGrade,
@@ -164,7 +170,7 @@ class SecurifyAuditTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function it_filters_passed_results()
     {
         $results = [
@@ -180,7 +186,7 @@ class SecurifyAuditTest extends TestCase
         $this->assertCount(1, $audit->getWarnings());
     }
 
-    /** @test */
+    #[Test]
     public function it_filters_by_severity()
     {
         $results = [
@@ -197,7 +203,7 @@ class SecurifyAuditTest extends TestCase
         $this->assertCount(0, $audit->getBySeverity('low'));
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_score_breakdown()
     {
         $results = [
@@ -232,7 +238,7 @@ class SecurifyAuditTest extends TestCase
         $this->assertEquals(1, $breakdown['low']['passed']);
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_empty_results()
     {
         $audit = $this->createAuditWithResults([]);
@@ -245,46 +251,5 @@ class SecurifyAuditTest extends TestCase
         $this->assertCount(0, $audit->getWarnings());
     }
 
-    /**
-     * Build result arrays that produce the exact desired score.
-     */
-    private function buildResultsForScore(int $desiredScore): array
-    {
-        if ($desiredScore >= 100) {
-            return [
-                ['analyzer' => 'Pass', 'status' => 'passed', 'severity' => 'low', 'message' => 'ok'],
-            ];
-        }
 
-        if ($desiredScore <= 0) {
-            return [
-                ['analyzer' => 'Fail', 'status' => 'failed', 'severity' => 'critical', 'message' => 'fail'],
-            ];
-        }
-
-        // Use a failed critical (20 penalty) + passed checks to hit exact score ranges
-        $results = [
-            [
-                'analyzer' => 'Failed Critical Check',
-                'description' => 'Weight: 20',
-                'status' => 'failed',
-                'severity' => 'critical',
-                'message' => 'fail',
-            ],
-        ];
-
-        // Add neutral passed checks to adjust ratio
-        $passCount = max(1, intval((100 - $desiredScore) / 3));
-        for ($i = 0; $i < $passCount; $i++) {
-            $results[] = [
-                'analyzer' => 'Passed Check ' . $i,
-                'description' => 'Zero weight',
-                'status' => 'passed',
-                'severity' => 'low',
-                'message' => 'ok',
-            ];
-        }
-
-        return $results;
-    }
 }
