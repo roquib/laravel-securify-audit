@@ -1,0 +1,13 @@
+includes:
+    - vendor/phpstan/phpstan/conf/bleeding-edge.neon
+
+parameters:
+    level: 6
+    paths:
+        - src
+        - config
+    ignoreErrors:
+        - '#Call to an undefined method Illuminate\\Support\\.*::#' # Laravel facade/proxy pattern
+        - '#Access to an undefined property Illuminate\\Contracts\\Foundation\\Application::#' # Dynamic Laravel properties
+    checkGenericClassInNonGenericObjectType: false
+    treatPhpDocTypesAsCertain: false
